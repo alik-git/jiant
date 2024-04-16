@@ -16,6 +16,7 @@ from jiant.shared.runner import (
 from jiant.utils.display import maybe_tqdm
 from jiant.utils.python.datastructures import InfiniteYield, ExtendedDataClassMixin
 
+import wandb
 
 @dataclass
 class RunnerParameters(ExtendedDataClassMixin):
@@ -125,6 +126,16 @@ class JiantRunner:
                 "global_step": train_state.global_steps,
                 "loss_val": loss_val / task_specific_config.gradient_accumulation_steps,
             },
+        )
+        # also log with wandb
+        wandb.log(
+            {
+                f"{task_name}_loss_train": loss_val / task_specific_config.gradient_accumulation_steps,
+                f"{task_name}_task_step": train_state.task_steps[task_name],
+                "global_step": train_state.global_steps,
+                
+             
+            }
         )
 
     def run_val(self, task_name_list, use_subset=None, return_preds=False, verbose=True):

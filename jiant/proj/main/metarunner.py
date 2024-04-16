@@ -15,7 +15,7 @@ from jiant.utils.torch_utils import copy_state_dict, CPU_DEVICE, get_model_for_s
 from jiant.utils.zlog import BaseZLogger, PRINT_LOGGER
 from jiant.shared.metarunner import AbstractMetarunner
 
-
+import wandb
 @dataclass
 class ValState(ExtendedDataClassMixin):
     score: float
@@ -258,5 +258,18 @@ class JiantMetarunner(AbstractMetarunner):
                 "train_state": self.train_state.to_dict(),
             },
         )
+        
+        # WandB Logging
+        wandb.log({
+            "eval_score": val_state.score,
+            "num_evals_since_improvement": self.num_evals_since_improvement,
+            "global_step": val_state.train_state.global_steps,
+        })
+        
+        # Logging each task-specific metric
+        for task_name, metrics in val_state.metrics.items():
+            for metric_name, metric_value in metrics.items():
+                wandb.log({f"{task_name}_{metric_name}": metric_value})
+                
         self.log_writer.flush()
         self.val_state_history.append(val_state)
