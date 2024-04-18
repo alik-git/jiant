@@ -129,3 +129,5 @@ dmypy.json
 
 wandb
 glue_exps
+glue_task_exps
+glue_exps_tasks
